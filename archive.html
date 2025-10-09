@@ -24,7 +24,49 @@
       <h2>档案与链接</h2>
       <h3>本页面提供相关档案与外部链接，供各位进一步探索与研究。</h3>
     </section>
+    <section class="archives">
+      <h3>文件档案</h3>
+      <ul id="file-list" class="archive-list"></ul>
+    </section>
 
+    <script>
+      async function loadArchiveList() {
+        try {
+          const res = await fetch("archive/manifest.json");
+          const data = await res.json();
+          const list = document.getElementById("file-list");
+          list.innerHTML = "";
+
+          data.files.forEach(item => {
+            const li = document.createElement("li");
+            li.className = "archive-item";
+            li.innerHTML = `
+              <strong>${item.title}</strong> — ${item.description || ""}
+            `;
+            li.style.cursor = "pointer";
+
+            // 双击操作
+            li.ondblclick = () => {
+              const choice = confirm(`是否预览《${item.title}》？\n点击“确定”预览，点击“取消”下载。`);
+              if (choice) {
+                // 预览模式：跳转到预览页面
+                window.open(`viewer.html?file=${encodeURIComponent(item.filename)}&title=${encodeURIComponent(item.title)}`);
+              } else {
+                // 下载模式
+                window.location.href = `archive/${encodeURIComponent(item.filename)}`;
+              }
+            };
+
+            list.appendChild(li);
+          });
+        } catch (err) {
+          console.error(err);
+          document.getElementById("file-list").textContent = "无法加载档案列表。";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", loadArchiveList);
+    </script>
     <section class="resources">
       <h3>外部链接</h3>
       <ul>
